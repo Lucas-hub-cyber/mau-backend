@@ -1,39 +1,25 @@
-# MAU Backend - WhatsApp + OpenAI
 
-Este es el backend del asistente MAU para Ultimate Technology.
+# MAU Backend - Ultimate Technology 🤖
 
-## ¿Qué hace?
+Este es el backend de MAU, el asistente conversacional de Ultimate Technology, conectado con WhatsApp Business y OpenAI.
 
-- Recibe mensajes por WhatsApp
-- Consulta OpenAI con personalidad de MAU
-- Responde automáticamente al usuario
+## 🧠 ¿Qué hace?
+- Recibe mensajes desde WhatsApp
+- Consulta a GPT-4o con un prompt personalizado
+- Devuelve respuestas alineadas con el estilo técnico, consultivo y profesional de MAU
 
-## 🚀 Cómo desplegar
+## 🔧 Instalación
 
-1. Clona el repositorio
-2. Renombra `.env.example` a `.env` y coloca tus claves
-3. Instala dependencias:
-   ```bash
-   npm install
-   ```
-4. Inicia el servidor:
-   ```bash
-   npm start
-   ```
-
-## 🔐 Variables de entorno
+1. Clona este repo
+2. Crea un archivo `.env` basado en `.env.example`
+3. Ejecuta:
 
 ```
-WHATSAPP_TOKEN=...
-PHONE_NUMBER_ID=...
-OPENAI_API_KEY=...
+npm install
+npm start
 ```
 
-## 🌐 Webhook para Meta
+Despliegue recomendado en Render.
 
-Configura tu webhook en Meta con la URL:
-```
-https://TU_DOMINIO/webhook
-```
-
-Listo. MAU comenzará a responder automáticamente.
+## ✨ Desarrollado para:
+Lucas Valencia - Ultimate Technology SAS

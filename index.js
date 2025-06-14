@@ -1,4 +1,3 @@
-
 const express = require('express');
 const axios = require('axios');
 const app = express();
@@ -7,6 +6,22 @@ app.use(express.json());
 const token = process.env.WHATSAPP_TOKEN;
 const phoneId = process.env.PHONE_NUMBER_ID;
 const openaiKey = process.env.OPENAI_API_KEY;
+
+// --- ESTA ES LA RUTA PARA VERIFICAR EL WEBHOOK DE META ---
+app.get('/webhook', (req, res) => {
+  const VERIFY_TOKEN = "mau_ultimate";
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+
+  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+    console.log("WEBHOOK_VERIFIED");
+    res.status(200).send(challenge);
+  } else {
+    res.sendStatus(403);
+  }
+});
+// ---------------------------------------------------------
 
 app.get('/', (_, res) => res.send('MAU is online'));
 

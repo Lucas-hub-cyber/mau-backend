@@ -1,5 +1,7 @@
 const express = require('express');
 const axios = require('axios');
+require('dotenv').config();
+
 const app = express();
 app.use(express.json());
 
@@ -7,23 +9,9 @@ const token = process.env.WHATSAPP_TOKEN;
 const phoneId = process.env.PHONE_NUMBER_ID;
 const openaiKey = process.env.OPENAI_API_KEY;
 
-// --- ESTA ES LA RUTA PARA VERIFICAR EL WEBHOOK DE META ---
-app.get('/webhook', (req, res) => {
-  const VERIFY_TOKEN = "mau_ultimate";
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
+const MAU_PROMPT = `Eres MAU, el asistente digital de Ultimate Technology. Tu función es apoyar a los clientes en sus dudas sobre automatización de edificios, eficiencia energética, seguridad electrónica, sistemas audiovisuales, integración con SOCI y procesos de transformación digital. Tienes un tono profesional pero cercano, respondes con seguridad, claridad y un toque de humor inteligente. Eres un aliado comercial y técnico.`;
 
-  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-    console.log("WEBHOOK_VERIFIED");
-    res.status(200).send(challenge);
-  } else {
-    res.sendStatus(403);
-  }
-});
-// ---------------------------------------------------------
-
-app.get('/', (_, res) => res.send('MAU is online'));
+app.get('/', (_, res) => res.send('MAU backend está activo.'));
 
 app.post('/webhook', async (req, res) => {
   const entry = req.body.entry?.[0]?.changes?.[0]?.value;
@@ -32,31 +20,39 @@ app.post('/webhook', async (req, res) => {
 
   if (!message || !from) return res.sendStatus(200);
 
-  const gpt = await axios.post('https://api.openai.com/v1/chat/completions', {
-    model: "gpt-4o",
-    messages: [{ role: "user", content: message }]
-  }, {
-    headers: {
-      Authorization: `Bearer ${openaiKey}`,
-      "Content-Type": "application/json"
-    }
-  });
+  try {
+    const gpt = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: MAU_PROMPT },
+        { role: "user", content: message }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${openaiKey}`,
+        "Content-Type": "application/json"
+      }
+    });
 
-  const reply = gpt.data.choices?.[0]?.message?.content || "No entendí bien, ¿puedes repetirlo?";
+    const reply = gpt.data.choices?.[0]?.message?.content || "Lo siento, no entendí bien. ¿Puedes repetirlo?";
 
-  await axios.post(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
-    messaging_product: "whatsapp",
-    to: from,
-    type: "text",
-    text: { body: reply }
-  }, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    }
-  });
+    await axios.post(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+      messaging_product: "whatsapp",
+      to: from,
+      type: "text",
+      text: { body: reply }
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
 
-  res.sendStatus(200);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Error en webhook:', error);
+    res.sendStatus(500);
+  }
 });
 
-app.listen(3000, () => console.log('MAU backend listening on port 3000'));
+app.listen(3000, () => console.log('✅ MAU backend escuchando en puerto 3000'));

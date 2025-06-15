@@ -1,4 +1,3 @@
-
 const express = require('express');
 const axios = require('axios');
 const app = express();
@@ -8,37 +7,44 @@ const token = process.env.WHATSAPP_TOKEN;
 const phoneId = process.env.PHONE_NUMBER_ID;
 const openaiKey = process.env.OPENAI_API_KEY;
 
-app.get('/', (_, res) => res.send('MAU is online'));
-
-const MAU_PROMPT = `
-Eres MAU, el asistente conversacional de Ultimate Technology. Tu misión es guiar a clientes en la transformación digital de sus negocios, especialmente en áreas como automatización de edificios, eficiencia energética, seguridad electrónica, integración audiovisual y el uso de la plataforma SOCI.
-
-Tu estilo es:
-- Profesional, claro y consultivo.
-- Directo, pero con un toque de humor inteligente.
-- No vendes, diagnosticas y recomiendas como un experto.
-- Siempre representas a Ultimate Technology y sus valores de innovación, eficiencia y cercanía.
-
-Ejemplos:
-- “Hola, soy MAU. ¿Quieres optimizar el consumo energético de tu edificio o automatizar procesos?”
-- “Podemos conectar tus sensores con SOCI y ayudarte a tomar decisiones basadas en datos, ¿te interesa saber cómo?”
-- “Aquí no vendemos humo, vendemos eficiencia con resultados medibles. ¿Cuál es tu reto actual?”
-
-Siempre responde alineado a esa personalidad.
+const SYSTEM_PROMPT = `
+Eres MAU, el asistente técnico de Ultimate Technology. Tu estilo es profesional, claro, consultivo, con toques de humor inteligente. 
+Prioriza las marcas aliadas: Extron, Crestron y las marcas propias de seguridad. 
+Incluye en tus respuestas enlaces útiles, casos de éxito, y siempre ofrece la posibilidad de hablar con un asesor humano si se solicita.
+No puedes procesar imágenes ni audios (responde educadamente cuando te envíen uno).
 `;
+
+app.get('/', (_, res) => res.send('🟢 MAU backend activo'));
 
 app.post('/webhook', async (req, res) => {
   const entry = req.body.entry?.[0]?.changes?.[0]?.value;
-  const message = entry?.messages?.[0]?.text?.body;
-  const from = entry?.messages?.[0]?.from;
+  const message = entry?.messages?.[0];
+  const from = message?.from;
+  const msgType = message?.type;
 
   if (!message || !from) return res.sendStatus(200);
 
-  const gpt = await axios.post('https://api.openai.com/v1/chat/completions', {
+  let userMessage = "";
+  if (msgType === "text") {
+    userMessage = message.text.body;
+  } else {
+    await sendMessage(from, "🧠 Por ahora solo puedo responder texto. ¡Pero estoy atento a ayudarte! Escríbeme lo que necesites.");
+    return res.sendStatus(200);
+  }
+
+  // Chequeo si pide hablar con humano
+  const lowerMsg = userMessage.toLowerCase();
+  if (["humano", "asesor", "persona", "reunión"].some(k => lowerMsg.includes(k))) {
+    await sendMessage(from, "📞 Puedo agendarte con un asesor humano. ¿Cuál es tu número o correo?");
+    return res.sendStatus(200);
+  }
+
+  // Respuesta de OpenAI
+  const gpt = await axios.post("https://api.openai.com/v1/chat/completions", {
     model: "gpt-4o",
     messages: [
-      { role: "system", content: MAU_PROMPT },
-      { role: "user", content: message }
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userMessage }
     ]
   }, {
     headers: {
@@ -47,21 +53,23 @@ app.post('/webhook', async (req, res) => {
     }
   });
 
-  const reply = gpt.data.choices?.[0]?.message?.content || "No entendí bien, ¿puedes repetirlo?";
+  const reply = gpt.data.choices?.[0]?.message?.content || "🤔 No entendí bien, ¿puedes repetirlo?";
+  await sendMessage(from, reply);
+  res.sendStatus(200);
+});
 
+async function sendMessage(to, body) {
   await axios.post(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
     messaging_product: "whatsapp",
-    to: from,
+    to,
     type: "text",
-    text: { body: reply }
+    text: { body }
   }, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json"
     }
   });
+}
 
-  res.sendStatus(200);
-});
-
-app.listen(3000, () => console.log('MAU backend listening on port 3000'));
+app.listen(3000, () => console.log('✅ MAU backend escuchando en puerto 3000'));

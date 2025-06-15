@@ -1,13 +1,6 @@
-# MAU Backend
+# MAU Backend con Agendamiento Google Calendar
 
-Este es el backend del asistente MAU de Ultimate Technology.
-Incluye:
-- Conexión con WhatsApp Business API
-- Integración con OpenAI GPT-4o
-- Respuestas personalizadas para Ultimate Technology
-
-## Archivos
-- `index.js`: servidor Express que recibe mensajes y responde
-- `.env.example`: variables necesarias para correr
-- `package.json`: dependencias
-- `README.md`: esta guía
+Este agente permite:
+- Agendar reuniones automáticamente desde WhatsApp
+- Crear eventos de 1 hora en el calendario compartido
+- Adjuntar nombre y correo del cliente

@@ -1,16 +1,17 @@
-# 🤖 MAU Backend
+# MAU Backend
 
-Este es el backend de MAU, el asistente conversacional de Ultimate Technology para WhatsApp.
+Este es el backend en Node.js para el bot MAU de Ultimate Technology. Está diseñado para responder mensajes de texto de WhatsApp utilizando la API de OpenAI y Meta WhatsApp Cloud API.
 
-## 🚀 Despliegue Rápido
-1. Configura tu archivo `.env` basado en `.env.example`.
-2. Sube el proyecto a Render como Web Service.
-3. Usa la URL pública para configurar el webhook en Meta.
-4. ¡Listo! MAU responderá como un asesor técnico con tono consultivo y humor ágil.
+## 🚀 Cómo desplegar
 
-## 🧠 Capacidades Especiales
-- Integra OpenAI (GPT-4o)
-- Detecta texto, ignora imágenes/audios con respuesta educada
-- Ofrece conexión con asesores humanos
-- Menciona marcas aliadas prioritarias
-- Incluye enlaces útiles a catálogos, portafolios y contacto
+1. Clona el repositorio
+2. Crea un archivo `.env` con las variables necesarias.
+3. Ejecuta `npm install`
+4. Ejecuta `npm start`
+
+## 📁 Archivos
+
+- `index.js`: Lógica del bot
+- `package.json`: Dependencias
+- `.env.example`: Variables requeridas
+- `README.md`: Esta guía
